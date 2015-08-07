@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">JumbleHelper</string>
+
+    <string name="enter_word">Enter Yore Word Here!!</string>
+    <string name="your_word">Your Word Is..</string>
+    <string name="action_settings">Settings</string>
+</resources>
