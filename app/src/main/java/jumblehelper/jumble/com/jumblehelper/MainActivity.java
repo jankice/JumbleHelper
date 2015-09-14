@@ -1,7 +1,9 @@
 package jumblehelper.jumble.com.jumblehelper;
 
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -9,7 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
 
@@ -30,6 +35,11 @@ public class MainActivity extends ActionBarActivity {
     TextView view_mul;
     TextView view_word;
     BigInteger mul = BigInteger.ONE;
+   // private ProgressBar spinner;
+    TextToSpeech tts;
+    Button btn_speech;
+    ImageButton btn_img_speech;
+
     HashMap<Character, Integer> m;
 
 
@@ -75,16 +85,52 @@ public class MainActivity extends ActionBarActivity {
 
         btn_get = (Button) findViewById(R.id.btnGet);
         edt_char = (EditText) findViewById(R.id.editText);
-        view_mul = (TextView) findViewById(R.id.viewMul);
+       // view_mul = (TextView) findViewById(R.id.viewMul);
         view_word = (TextView) findViewById(R.id.yourWord);
+
+
+        btn_speech = (Button) findViewById(R.id.btnSpeech);
+        btn_img_speech = (ImageButton) findViewById(R.id.imageButton);
+        btn_img_speech.setVisibility(View.GONE);
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                if(i != TextToSpeech.ERROR){
+                    tts.setLanguage(Locale.ENGLISH);
+                }
+
+            }
+        });
+        btn_img_speech.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String spk = view_word.getText().toString();
+                tts.speak(spk,TextToSpeech.QUEUE_FLUSH,null);
+
+            }
+        });
 
         btn_get.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d("debug", "click");
-                String word = edt_char.getText().toString();
-                BigInteger computation = compute(word);
-                view_mul.setText(computation.toString());
+
+
+                btn_img_speech.setVisibility(View.VISIBLE);
+
+            String word = edt_char.getText().toString();
+                if(word.equals("")){
+
+                    Toast.makeText(getApplicationContext(),"You did not enter any word", Toast.LENGTH_LONG).show();
+
+                }
+
+            else {
+
+                    BigInteger computation = compute(word);
+                }
+
+//                view_mul.setText(computation.toString());
 
 
                 AssetManager assetManager = getAssets();
@@ -102,7 +148,11 @@ public class MainActivity extends ActionBarActivity {
             }
         });
     }
-
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_main);
+    }
 
     public BigInteger compute(String s) {
         BigInteger mul = BigInteger.ONE;
@@ -141,6 +191,7 @@ public class MainActivity extends ActionBarActivity {
         Arrays.sort(wordArray, new CompareWord());
         Log.d("array", "sorted");
 
+       
 
         int position = Arrays.binarySearch(wordArray, new Word(edt_char.getText().toString() + "," + String.valueOf(compute(edt_char.getText().toString()))), new CompareWord());
         if (position >= 0) {
@@ -171,10 +222,10 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
         }
-
+*/
         return super.onOptionsItemSelected(item);
     }
 }
