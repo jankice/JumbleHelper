@@ -5,6 +5,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +37,7 @@ public class MainActivity extends ActionBarActivity {
     TextView view_mul;
     TextView view_word;
     BigInteger mul = BigInteger.ONE;
-   // private ProgressBar spinner;
+
     TextToSpeech tts;
     Button btn_speech;
     ImageButton btn_img_speech;
@@ -85,13 +87,13 @@ public class MainActivity extends ActionBarActivity {
 
         btn_get = (Button) findViewById(R.id.btnGet);
         edt_char = (EditText) findViewById(R.id.editText);
-       // view_mul = (TextView) findViewById(R.id.viewMul);
         view_word = (TextView) findViewById(R.id.yourWord);
 
 
-        btn_speech = (Button) findViewById(R.id.btnSpeech);
+       // btn_speech = (Button) findViewById(R.id.btnSpeech);
         btn_img_speech = (ImageButton) findViewById(R.id.imageButton);
         btn_img_speech.setVisibility(View.GONE);
+
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int i) {
@@ -101,6 +103,20 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (!Character.isLetter(source.charAt(i))) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        edt_char.setFilters(new InputFilter[] { filter });
+
         btn_img_speech.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,7 +146,7 @@ public class MainActivity extends ActionBarActivity {
                     BigInteger computation = compute(word);
                 }
 
-//                view_mul.setText(computation.toString());
+
 
 
                 AssetManager assetManager = getAssets();
@@ -163,7 +179,7 @@ public class MainActivity extends ActionBarActivity {
         return mul;
     }
 
-    public void parsefile(InputStream strm, char[] index) {
+   /* public void parsefile(InputStream strm, char[] index) {
         ArrayList<String> fileContents = new ArrayList<String>();
         BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
 
@@ -200,6 +216,73 @@ public class MainActivity extends ActionBarActivity {
 
 
             view_word.setText(result.getWord());
+        } else {
+            view_word.setText("word not found");
+        }
+
+    }*/
+
+    public void parsefile(InputStream strm, char[] index) {
+        ArrayList<String> fileContents = new ArrayList<String>();
+        BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
+
+        try {
+            String str;
+            do {
+                str = bfr.readLine();
+                if (str != null) {
+                    fileContents.add(str);
+                }
+
+            } while (str != null);
+            Log.d("debug", String.valueOf(fileContents.size()));
+        } catch (IOException ex) {
+
+        }
+
+        ArrayList<Word> wordArrayList = new ArrayList<Word>(fileContents.size());  //Word[fileContents.size()];
+        int ind = 0;
+        while(ind<fileContents.size())
+        {
+            int frdind = ind+1;
+            Word currentObj = new Word(fileContents.get(ind));
+            Word frdObj = new Word(fileContents.get(frdind));
+            BigInteger Crntindkey=currentObj.getHash();
+            BigInteger Frdindkey = frdObj.getHash();
+
+
+            while(Crntindkey==Frdindkey){
+
+                currentObj.wordlist.add(frdObj.getWord());
+                frdind++;
+
+            frdObj = new Word(fileContents.get(frdind));
+            Frdindkey = frdObj.getHash();
+
+            }
+            ind=frdind;
+            wordArrayList.add(currentObj);
+
+
+        }
+       /* for (int i = 0; i < fileContents.size(); i++) {
+            wordArray[i] = new Word(fileContents.get(i));
+
+        }*/
+        Word[] wordArray = (Word[])wordArrayList.toArray();
+
+        Arrays.sort(wordArray, new CompareWord());
+        Log.d("array", "sorted");
+
+
+
+        int position = Arrays.binarySearch(wordArray, new Word(edt_char.getText().toString() + "," + String.valueOf(compute(edt_char.getText().toString()))), new CompareWord());
+        if (position >= 0) {
+            Log.d("debug", "Fetching data from " + position);
+            Word result = wordArray[position];
+
+
+            view_word.setText(result.getallwordstring());
         } else {
             view_word.setText("word not found");
         }
