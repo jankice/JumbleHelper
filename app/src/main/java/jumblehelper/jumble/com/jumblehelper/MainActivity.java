@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -43,7 +42,7 @@ public class MainActivity extends ActionBarActivity {
     ImageButton btn_img_speech;
 
     HashMap<Character, Integer> m;
-
+    HashMap<BigInteger,ArrayList<String>> dictionary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,8 +222,13 @@ public class MainActivity extends ActionBarActivity {
     }*/
 
     public void parsefile(InputStream strm, char[] index) {
-        ArrayList<String> fileContents = new ArrayList<String>();
+
+        dictionary = new HashMap<BigInteger,ArrayList<String>>();
         BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
+
+
+       ArrayList<String> fileContents = new ArrayList<String>();
+    //    BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
 
         try {
             String str;
@@ -240,51 +244,24 @@ public class MainActivity extends ActionBarActivity {
 
         }
 
-        ArrayList<Word> wordArrayList = new ArrayList<Word>(fileContents.size());  //Word[fileContents.size()];
-        int ind = 0;
-        while(ind<fileContents.size())
-        {
-            int frdind = ind+1;
-            Word currentObj = new Word(fileContents.get(ind));
-            Word frdObj = new Word(fileContents.get(frdind));
-            BigInteger Crntindkey=currentObj.getHash();
-            BigInteger Frdindkey = frdObj.getHash();
+        for(int i=0;i<fileContents.size();i++){
 
+            String hash_word = fileContents.get(i);
+            hash_word.split(",");
 
-            while(Crntindkey==Frdindkey){
+            String[] wordparts = hash_word.split(",");
 
-                currentObj.wordlist.add(frdObj.getWord());
-                frdind++;
+            BigInteger Hash = new BigInteger(wordparts[0]);
+            String Word = wordparts[1];
 
-            frdObj = new Word(fileContents.get(frdind));
-            Frdindkey = frdObj.getHash();
-
+            if(dictionary.containsKey(Hash)){
+                (dictionary.get(Hash)).add(Word);
             }
-            ind=frdind;
-            wordArrayList.add(currentObj);
+            else{
+                ArrayList<String> words = new ArrayList<String>();
+                dictionary.put(Hash,words);
+             }
 
-
-        }
-       /* for (int i = 0; i < fileContents.size(); i++) {
-            wordArray[i] = new Word(fileContents.get(i));
-
-        }*/
-        Word[] wordArray = (Word[])wordArrayList.toArray();
-
-        Arrays.sort(wordArray, new CompareWord());
-        Log.d("array", "sorted");
-
-
-
-        int position = Arrays.binarySearch(wordArray, new Word(edt_char.getText().toString() + "," + String.valueOf(compute(edt_char.getText().toString()))), new CompareWord());
-        if (position >= 0) {
-            Log.d("debug", "Fetching data from " + position);
-            Word result = wordArray[position];
-
-
-            view_word.setText(result.getallwordstring());
-        } else {
-            view_word.setText("word not found");
         }
 
     }

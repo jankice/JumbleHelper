@@ -27,10 +27,6 @@ public class Word {
         }
         // String index = String.valueOf(String.valueOf(hash).indexOf(word));
 }
-
-
-
-
     private String word;
     private BigInteger hash;
 
