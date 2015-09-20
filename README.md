@@ -12,12 +12,9 @@ Text to Speech API.
   
     In textbox if you enter "ppale" it gives "apple".
     After getting correct word there is an audio symbol, 
-    when you press that symbol it will pronounce correct word which is gnerating 
+    when you press that symbol it will pronounce correct word which is found 
     from unjumbled word.
     
-  Known Issues:
-    
-    Multiple words not found. 
     
   
     
