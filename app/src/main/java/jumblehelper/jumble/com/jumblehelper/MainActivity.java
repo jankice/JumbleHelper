@@ -1,269 +1,100 @@
 package jumblehelper.jumble.com.jumblehelper;
 
-import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
+import jumblehelper.jumble.com.jumblehelper.task.AssetLoader;
+import jumblehelper.jumble.com.jumblehelper.util.ParseFile;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
-    Button btn_get;
-    EditText edt_char;
-    TextView view_mul;
-    TextView view_word;
-    BigInteger mul = BigInteger.ONE;
-
-    TextToSpeech tts;
-    Button btn_speech;
-    ImageButton btn_img_speech;
-
-    HashMap<Character, Integer> m;
-    HashMap<BigInteger,ArrayList<String>> dictionary;
+    private EditText edt_char;
+    private TextToSpeech tts;
+    private ParseFile parseFile;
+    private ListView wordListView;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Log.d("start", "hashmp");
 
-        m = new HashMap<Character, Integer>();
-
-        m.put('a', 2);
-        m.put('b', 3);
-        m.put('c', 5);
-        m.put('d', 7);
-        m.put('e', 11);
-        m.put('f', 13);
-        m.put('g', 17);
-        m.put('h', 19);
-        m.put('i', 23);
-        m.put('j', 29);
-        m.put('k', 31);
-        m.put('l', 37);
-        m.put('m', 43);
-        m.put('n', 47);
-        m.put('o', 53);
-        m.put('p', 59);
-        m.put('q', 61);
-        m.put('r', 67);
-        m.put('s', 71);
-        m.put('t', 73);
-        m.put('u', 79);
-        m.put('v', 83);
-        m.put('w', 89);
-        m.put('x', 97);
-        m.put('y', 101);
-        m.put('z', 103);
-
-        Set set = m.entrySet();
-        Iterator i = set.iterator();
-
-
-        btn_get = (Button) findViewById(R.id.btnGet);
         edt_char = (EditText) findViewById(R.id.editText);
-        view_word = (TextView) findViewById(R.id.yourWord);
-
-
-       // btn_speech = (Button) findViewById(R.id.btnSpeech);
-        btn_img_speech = (ImageButton) findViewById(R.id.imageButton);
-        btn_img_speech.setVisibility(View.GONE);
+        wordListView = (ListView) findViewById(R.id.word_listview);
+        wordListView.setOnItemClickListener(this);
+        linearLayout = (LinearLayout) findViewById(R.id.linear_layout_child_2);
 
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int i) {
-                if(i != TextToSpeech.ERROR){
+                if (i != TextToSpeech.ERROR) {
                     tts.setLanguage(Locale.ENGLISH);
                 }
 
             }
         });
 
-        InputFilter filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                for (int i = start; i < end; i++) {
-                    if (!Character.isLetter(source.charAt(i))) {
-                        return "";
-                    }
-                }
-                return null;
-            }
-        };
-        edt_char.setFilters(new InputFilter[] { filter });
+        parseFile = new ParseFile(this);
 
-        btn_img_speech.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String spk = view_word.getText().toString();
-                tts.speak(spk,TextToSpeech.QUEUE_FLUSH,null);
-
-            }
-        });
-
-        btn_get.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("debug", "click");
-
-
-                btn_img_speech.setVisibility(View.VISIBLE);
-
-            String word = edt_char.getText().toString();
-                if(word.equals("")){
-
-                    Toast.makeText(getApplicationContext(),"You did not enter any word", Toast.LENGTH_LONG).show();
-
-                }
-
-            else {
-
-                    BigInteger computation = compute(word);
-                }
-
-
-
-
-                AssetManager assetManager = getAssets();
-                //  InputStream is = null;
-                try {
-                    InputStream is = assetManager.open("W3.TXT");
-                    parsefile(is, new char[0]);
-
-
-                } catch (IOException e) {
-
-                    e.printStackTrace();
-                }
-
-            }
-        });
+        new AssetLoader(this, parseFile).execute();
     }
+
+    public void viewOnClick(View button) {
+
+        switch (button.getId()) {
+
+            case R.id.btnGet:
+
+                String word = edt_char.getText().toString();
+                if (!"".equalsIgnoreCase(word) && parseFile.supportedWordFormat(word)) {
+                    displayJumbleWord(parseFile.getAllMatchingJumbleWords(word.toLowerCase()));
+                } else {
+                    hideView();
+                    Toast.makeText(getApplicationContext(), "invalid word", Toast.LENGTH_LONG).show();
+                }
+                break;
+
+        }
+
+    }
+
+    private void displayJumbleWord(HashSet<String> jumbleWordsSet) {
+        if (jumbleWordsSet != null && !jumbleWordsSet.isEmpty()) {
+            wordListView.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.VISIBLE);
+            String[] words = jumbleWordsSet.toArray(new String[jumbleWordsSet.size()]);
+            wordListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, words));
+        } else {
+            hideView();
+        }
+    }
+
+    private void hideView()
+    {
+        wordListView.setVisibility(View.GONE);
+        linearLayout.setVisibility(View.GONE);
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setContentView(R.layout.activity_main);
-    }
-
-    public BigInteger compute(String s) {
-        BigInteger mul = BigInteger.ONE;
-        for (int i = 0; i < s.length(); i++) {
-            mul = mul.multiply(BigInteger.valueOf(m.get(s.charAt(i))));
-        }
-
-        return mul;
-    }
-
-   /* public void parsefile(InputStream strm, char[] index) {
-        ArrayList<String> fileContents = new ArrayList<String>();
-        BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
-
-        try {
-            String str;
-            do {
-                str = bfr.readLine();
-                if (str != null) {
-                    fileContents.add(str);
-                }
-
-            } while (str != null);
-            Log.d("debug", String.valueOf(fileContents.size()));
-        } catch (IOException ex) {
-
-        }
-
-        Word[] wordArray = new Word[fileContents.size()];
-
-        for (int i = 0; i < fileContents.size(); i++) {
-            wordArray[i] = new Word(fileContents.get(i));
-
-        }
-
-        Arrays.sort(wordArray, new CompareWord());
-        Log.d("array", "sorted");
-
-       
-
-        int position = Arrays.binarySearch(wordArray, new Word(edt_char.getText().toString() + "," + String.valueOf(compute(edt_char.getText().toString()))), new CompareWord());
-        if (position >= 0) {
-            Log.d("debug", "Fetching data from " + position);
-            Word result = wordArray[position];
-
-
-            view_word.setText(result.getWord());
-        } else {
-            view_word.setText("word not found");
-        }
-
-    }*/
-
-    public void parsefile(InputStream strm, char[] index) {
-
-        dictionary = new HashMap<BigInteger,ArrayList<String>>();
-        BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
-
-
-       ArrayList<String> fileContents = new ArrayList<String>();
-    //    BufferedReader bfr = new BufferedReader(new InputStreamReader(strm));
-
-        try {
-            String str;
-            do {
-                str = bfr.readLine();
-                if (str != null) {
-                    fileContents.add(str);
-                }
-
-            } while (str != null);
-            Log.d("debug", String.valueOf(fileContents.size()));
-        } catch (IOException ex) {
-
-        }
-
-        for(int i=0;i<fileContents.size();i++){
-
-            String hash_word = fileContents.get(i);
-            hash_word.split(",");
-
-            String[] wordparts = hash_word.split(",");
-
-            BigInteger Hash = new BigInteger(wordparts[0]);
-            String Word = wordparts[1];
-
-            if(dictionary.containsKey(Hash)){
-                (dictionary.get(Hash)).add(Word);
-            }
-            else{
-                ArrayList<String> words = new ArrayList<String>();
-                dictionary.put(Hash,words);
-             }
-
-        }
-
     }
 
 
@@ -281,11 +112,14 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            return true;
-        }
-*/
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String spk = (String)parent.getItemAtPosition(position);
+        Log.d("Selected text:", spk);
+        tts.speak(spk, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
 }
