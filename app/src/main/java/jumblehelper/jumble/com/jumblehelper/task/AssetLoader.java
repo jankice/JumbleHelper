@@ -1,31 +1,32 @@
-package jumblehelper.jumble.com.jumblehelper.task;
+package jumblehelper.jumble.com.jumblehelper.Task;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import jumblehelper.jumble.com.jumblehelper.util.ParseFile;
+import java.util.HashMap;
+import java.util.HashSet;
+
+import jumblehelper.jumble.com.jumblehelper.util.ResourceUtil;
 
 /**
- * Created by roshni on 9/20/2015.
+ * Created by kon1532 on 9/16/2015.
  */
 public class AssetLoader extends AsyncTask<String, Void, String> {
 
     private Context mContext;
-    private ParseFile parseFile;
     private ProgressDialog dialog;
 
-    public AssetLoader(Context context, ParseFile parseFile)
+    public AssetLoader(Context context)
     {
         mContext = context;
-        this.parseFile = parseFile;
         dialog = new ProgressDialog(context);
+        dialog.setCanceledOnTouchOutside(false);
     }
-
 
     @Override
     protected String doInBackground(String... urls) {
-        parseFile.readAssetFile();
+        ResourceUtil.copyDBFile(mContext, urls[0]);
         return "";
     }
 
@@ -36,5 +37,10 @@ public class AssetLoader extends AsyncTask<String, Void, String> {
         }
     }
 
-   
+    @Override
+    protected void onPreExecute() {
+        dialog.setMessage("copying dictionary, please wait...");
+        dialog.show();
+    }
 }
+
