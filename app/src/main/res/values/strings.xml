@@ -1,9 +1,0 @@
-<resources>
-    <string name="app_name">JumbleHelper</string>
-
-
-    <string name="enter_char">Enter your word here</string>
-
-    <string name="speech_word">Speech</string>
-    <string name="action_settings">Settings</string>
-</resources>
