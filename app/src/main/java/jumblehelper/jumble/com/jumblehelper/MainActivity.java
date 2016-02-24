@@ -17,8 +17,8 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
-import jumblehelper.jumble.com.jumblehelper.Task.AssetLoader;
-import jumblehelper.jumble.com.jumblehelper.Task.DataDictionaryTask;
+import jumblehelper.jumble.com.jumblehelper.task.AssetLoader;
+import jumblehelper.jumble.com.jumblehelper.task.DataDictionaryTask;
 import jumblehelper.jumble.com.jumblehelper.util.AlphabetToPrime;
 import jumblehelper.jumble.com.jumblehelper.util.ResourceUtil;
 
@@ -40,6 +40,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         wordListView = (ListView) findViewById(R.id.word_listview);
         wordListView.setOnItemClickListener(this);
 
+        // Text to speech API
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int i) {
@@ -95,6 +96,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         tts.speak(spk, TextToSpeech.QUEUE_FLUSH, null);
     }
 
+// this function copy database file only once.
+
     private void copyDBFileOnlyOnce()
     {
         prefs = getSharedPreferences("jumblehelper_pref", MODE_PRIVATE);
@@ -106,7 +109,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     }
 
 
-
+    // To hide soft keyboard.
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager = (InputMethodManager)  activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
