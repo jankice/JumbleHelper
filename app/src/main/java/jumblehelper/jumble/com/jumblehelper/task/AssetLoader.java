@@ -1,11 +1,8 @@
-package jumblehelper.jumble.com.jumblehelper.Task;
+package jumblehelper.jumble.com.jumblehelper.task;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-
-import java.util.HashMap;
-import java.util.HashSet;
 
 import jumblehelper.jumble.com.jumblehelper.util.ResourceUtil;
 

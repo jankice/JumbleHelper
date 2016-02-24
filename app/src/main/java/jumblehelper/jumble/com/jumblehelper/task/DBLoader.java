@@ -1,4 +1,4 @@
-package jumblehelper.jumble.com.jumblehelper.Task;
+package jumblehelper.jumble.com.jumblehelper.task;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import jumblehelper.jumble.com.jumblehelper.DB.SqliteHelper;
-import jumblehelper.jumble.com.jumblehelper.util.ResourceUtil;
 
 /**
  * Created by kon1532 on 9/16/2015.

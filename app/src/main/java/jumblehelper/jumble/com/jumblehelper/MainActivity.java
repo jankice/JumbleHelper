@@ -1,11 +1,11 @@
 package jumblehelper.jumble.com.jumblehelper;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,8 +17,9 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
-import jumblehelper.jumble.com.jumblehelper.Task.AssetLoader;
-import jumblehelper.jumble.com.jumblehelper.Task.DataDictionaryTask;
+import jumblehelper.jumble.com.jumblehelper.task.AssetLoader;
+import jumblehelper.jumble.com.jumblehelper.task.DataDictionaryTask;
+import jumblehelper.jumble.com.jumblehelper.task.WebViewDictionary;
 import jumblehelper.jumble.com.jumblehelper.util.AlphabetToPrime;
 import jumblehelper.jumble.com.jumblehelper.util.ResourceUtil;
 
@@ -29,6 +30,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     private TextToSpeech tts;
     private ListView wordListView;
     private SharedPreferences prefs = null;
+    public static final String key = "jhWord";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +92,15 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String spk = (String)parent.getItemAtPosition(position);
+        /*String spk = (String)parent.getItemAtPosition(position);
         Log.d("Selected text:", spk);
-        tts.speak(spk, TextToSpeech.QUEUE_FLUSH, null);
+        tts.speak(spk, TextToSpeech.QUEUE_FLUSH, null);*/
+
+         String urlval = (String)parent.getItemAtPosition(position);
+        Intent myIntent = new Intent(this, WebViewDictionary.class);
+      //  new Bundle();
+        myIntent.putExtra(key,urlval);
+        startActivity(myIntent);
     }
 
     private void copyDBFileOnlyOnce()
